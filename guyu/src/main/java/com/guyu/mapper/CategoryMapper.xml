@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- namespace:当前XML文件用于配置哪个接口中抽象方法对应的SQL语句 -->
+<mapper namespace="com.guyu.mapper.CategoryMapper">
+
+    <resultMap id="CateMap" type="com.guyu.entity.Category">
+        <id column="cate_id" property="cate_id"></id>
+        <id column="main_id" property="main_id"></id>
+        <id column="cate_name" property="cate_name"></id>
+        <id column="cate_status" property="cate_status"></id>
+        <id column="create_time" property="create_time"></id>
+        <id column="update_time" property="update_time"></id>
+        <association property="cateMain" javaType="com.guyu.entity.CateMain">
+            <result property="main_id" column="main_id"></result>
+            <result property="main_name" column="main_name"></result>
+        </association>
+    </resultMap>
+
+
+    <resultMap id="CateMainMap" type="com.guyu.entity.CateMain">
+        <id column="main_id" property="main_id"></id>
+        <id column="main_name" property="main_name"></id>
+        <id column="main_status" property="main_status"></id>
+        <id column="create_time" property="create_time"></id>
+        <id column="update_time" property="update_time"></id>
+        <collection property="categoryList" javaType="java.util.List" ofType="com.guyu.entity.Category">
+            <result property="cate_id" column="cate_id"></result>
+            <result property="main_id" column="main_id"></result>
+            <result property="cate_name" column="cate_name"></result>
+            <result property="cate_status" column="cate_status"></result>
+            <result property="create_time" column="create_time"></result>
+            <result property="update_time" column="update_time"></result>
+        </collection>
+    </resultMap>
+
+
+    <!--一级分类-->
+    <insert id="AddCateMain" parameterType="com.guyu.entity.CateMain">
+        INSERT into gy_categories(main_name,main_status,create_time,update_time)
+        VALUES (#{main_name},#{main_status},now(),now())
+    </insert>
+
+    <!--二级分类-->
+    <insert id="AddCate" parameterType="com.guyu.entity.Category">
+        INSERT into gy_category(main_id,cate_name,cate_status,create_time,update_time)
+        VALUES (#{main_id},#{cate_name},#{cate_status},now(),now())
+    </insert>
+
+    <!--一级分类-->
+    <update id="UpdateCateMain" parameterType="com.guyu.entity.CateMain">
+        update gy_categories
+        <set>
+            <if test="main_name!=null and main_name!=''">
+                main_name=#{main_name},
+            </if>
+            <if test="main_status!=null and main_status!=''">
+                main_status=#{main_status},
+            </if>
+        </set>
+        where main_id = #{main_id}
+    </update>
+
+    <!--二级分类-->
+    <update id="UpdateCate" parameterType="com.guyu.entity.Category">
+        update gy_category
+        <set>
+            <if test="main_id!=null and main_id!=''">
+                main_id=#{main_id},
+            </if>
+            <if test="cate_name!=null and cate_name!=''">
+                cate_name=#{cate_name},
+            </if>
+            <if test="cate_status!=null and cate_status!=''">
+                cate_status=#{cate_status},
+            </if>
+        </set>
+        where cate_id = #{cate_id}
+    </update>
+
+    <!--一级分类-->
+    <update id="CateMainUpdateStatus">
+        update gy_categories set main_status=#{main_status} where main_id = #{main_id}
+    </update>
+
+    <!--二级分类-->
+    <update id="CateUpdateStatus">
+        update gy_category set cate_status=#{cate_status} where cate_id = #{cate_id}
+    </update>
+
+    <!--一级分类-->
+    <update id="CateMainUpdateTime">
+        update gy_categories set update_time = now() where main_id = #{main_id}
+    </update>
+
+    <!--二级分类-->
+    <update id="CateUpdateTime">
+        update gy_category set update_time = now() where cate_id = #{cate_id}
+    </update>
+
+    <!--一级分类-->
+    <delete id="DelCateMain">
+        delete from gy_categories where main_id = #{main_id}
+    </delete>
+
+    <!--二级分类-->
+    <delete id="DelCate">
+        delete from gy_category where cate_id = #{cate_id}
+    </delete>
+
+    <!--一级分类-->
+    <delete id="CateMainDels" parameterType="Integer">
+        delete from gy_categories where main_id in
+        <foreach item="ids" collection="list" index="index" open="("
+                 separator="," close=")">
+            #{ids}
+        </foreach>
+    </delete>
+
+    <!--二级分类-->
+    <delete id="CateDels" parameterType="Integer">
+        delete from gy_category where cate_id in
+        <foreach item="ids" collection="list" index="index" open="("
+                 separator="," close=")">
+            #{ids}
+        </foreach>
+    </delete>
+
+    <!--一级分类-->
+    <select id="QueryCateMain" resultType="com.guyu.entity.CateMain">
+        select * from gy_categories limit #{start},#{point}
+    </select>
+
+    <!--二级分类-->
+<!--    <select id="QueryCate" resultType="com.guyu.entity.Category">-->
+<!--        select * from gy_category limit #{start},#{point}-->
+<!--    </select>-->
+    <select id="QueryCate" resultMap="CateMap">
+        SELECT
+            gy_category.*,
+            gy_categories.main_name
+        FROM
+			gy_category,gy_categories
+        where
+            gy_category.main_id=gy_categories.main_id
+        limit #{start},#{point}
+    </select>
+
+    <!--一级分类-->
+    <select id="CateMainTotal" resultType="java.lang.Integer">
+        select count(*) from gy_categories
+    </select>
+
+    <!--二级分类-->
+    <select id="CateTotal" resultType="java.lang.Integer">
+        select count(*) from gy_category
+    </select>
+
+    <!--一级分类-->
+    <select id="CateMainQuery" resultType="com.guyu.entity.CateMain">
+        select * from gy_categories
+        <trim prefix="where" prefixOverrides="and">
+            <if test="main_name != null and main_name != ''">
+                and main_name like concat("%",#{main_name},"%")
+            </if>
+            <if test="main_status != null and main_status != ''">
+                and main_status = #{main_status}
+            </if>
+            <if test="main_id != null and main_id!=''">
+                and main_id = #{main_id}
+            </if>
+        </trim>
+    </select>
+
+    <!--二级分类-->
+    <select id="FuzzyQuery" resultType="com.guyu.entity.Category">
+        select * from gy_category
+        <trim prefix="where" prefixOverrides="and">
+            <if test="cate_name != null and cate_name != ''">
+                and cate_name like concat("%",#{cate_name},"%")
+            </if>
+            <if test="sate_status != null and sate_status != ''">
+                and sate_status = #{sate_status}
+            </if>
+            <if test="cate_id != null and cate_id!=''">
+                and cate_id = #{cate_id}
+            </if>
+        </trim>
+    </select>
+
+    <select id="CateSelect" resultMap="CateMainMap">
+        SELECT
+            *
+        FROM
+			gy_categories
+        LEFT JOIN gy_category ON gy_categories.main_id  = gy_category.main_id
+    </select>
+
+    <select id="findCateMain" resultType="com.guyu.entity.CateMain">
+        SELECT * FROM gy_categories
+    </select>
+
+    <select id="findCate" resultType="com.guyu.entity.Category">
+         SELECT * FROM gy_category where main_id=#{main_id}
+    </select>
+
+    <select id="inquire_main" resultType="com.guyu.entity.CateMain">
+        SELECT * FROM gy_categories where main_id=#{main_id}
+    </select>
+    <select id="inquire_cate" resultType="com.guyu.entity.Category">
+        SELECT * FROM gy_category where cate_id=#{cate_id}
+    </select>
+
+    <select id="inquire_main_id" resultType="java.lang.Integer">
+        SELECT main_id FROM gy_category where cate_id=#{cate_id}
+    </select>
+
+
+</mapper>

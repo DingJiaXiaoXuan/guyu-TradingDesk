@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- namespace:当前XML文件用于配置哪个接口中抽象方法对应的SQL语句 -->
+<mapper namespace="com.guyu.mapper.SizeMapper">
+
+
+    <insert id="AddSize" parameterType="com.guyu.entity.Size">
+        INSERT into gy_size(pro_id,size_title,pro_price,unit,min_num,max_num,size_status,create_time,update_time)
+        VALUES (#{pro_id},#{size_title},#{pro_price},#{unit},#{min_num},#{max_num},#{size_status},now(),now())
+    </insert>
+
+    <delete id="DelSize">
+        delete from gy_size where size_id = #{size_id}
+    </delete>
+
+    <select id="QuerySize" resultType="com.guyu.entity.Size">
+        select * from gy_size where pro_id=#{pro_id} and size_status = 1
+    </select>
+
+    <select id="QuerySizeAfter" resultType="com.guyu.entity.Size">
+        select * from gy_size where pro_id=#{pro_id}
+    </select>
+
+    <update id="UpdateSize" parameterType="com.guyu.entity.Size">
+        update gy_size
+        <set>
+            <if test="size_title!=null and size_title!=''">
+                size_title=#{size_title},
+            </if>
+            <if test="pro_price!=null and pro_price!=''">
+                pro_price=#{pro_price},
+            </if>
+            <if test="unit!=null and unit!=''">
+                unit=#{unit},
+            </if>
+            <if test="min_num!=null and min_num!=''">
+                min_num=#{min_num},
+            </if>
+            <if test="max_num!=null and max_num!=''">
+                max_num=#{max_num},
+            </if>
+            <if test="size_status==0 or size_status==1">
+                size_status=#{size_status},
+            </if>
+
+        </set>
+        where size_id = #{size_id}
+    </update>
+
+    <update id="UpdateTime">
+        update gy_size set update_time = now() where size_id = #{size_id}
+    </update>
+
+    <update id="UpdateStatus">
+        update gy_size set size_status=#{size_status} where size_id = #{size_id}
+    </update>
+
+</mapper>

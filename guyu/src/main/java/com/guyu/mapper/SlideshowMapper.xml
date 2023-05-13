@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- namespace:当前XML文件用于配置哪个接口中抽象方法对应的SQL语句 -->
+<mapper namespace="com.guyu.mapper.SlideshowMapper">
+
+    <insert id="AddSlideshow" parameterType="com.guyu.entity.Slideshow">
+     INSERT into gy_slideshow(slide_imge,slide_status,create_time,update_time)
+        VALUES (#{slide_imge},#{slide_status},now(),now())
+    </insert>
+
+    <update id="UpdateSlideshowURl" parameterType="com.guyu.entity.Slideshow">
+        update gy_slideshow set slide_imge = #{slide_imge} where slide_id = #{slide_id}
+    </update>
+
+    <update id="UpdateTime">
+        update gy_slideshow set update_time = now() where slide_id = #{slide_id}
+    </update>
+
+    <update id="UpdateStatus">
+        update gy_slideshow set slide_status=#{slide_status} where slide_id = #{slide_id}
+    </update>
+
+    <delete id="DelSlideshow">
+        delete from gy_slideshow where slide_id= #{slide_id}
+    </delete>
+
+    <delete id="dels" parameterType="Integer">
+        delete from gy_slideshow where slide_id in
+        <foreach item="ids" collection="list" index="index" open="("
+                 separator="," close=")">
+            #{ids}
+        </foreach>
+    </delete>
+
+    <select id="Total" resultType="java.lang.Integer">
+        select count(*) from gy_slideshow
+    </select>
+
+    <select id="QuerySlideshow" resultType="com.guyu.entity.Slideshow">
+        SELECT * FROM gy_slideshow limit #{start},#{point}
+    </select>
+
+    <select id="findSlideshow" resultType="com.guyu.entity.Slideshow">
+        SELECT * FROM gy_slideshow where slide_status=#{slide_status}
+    </select>
+</mapper>

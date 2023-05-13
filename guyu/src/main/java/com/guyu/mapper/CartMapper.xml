@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- namespace:当前XML文件用于配置哪个接口中抽象方法对应的SQL语句 -->
+<mapper namespace="com.guyu.mapper.CartMapper">
+    <resultMap id="CartMap" type="com.guyu.entity.Cart">
+        <id column="cart_id" property="cart_id"></id>
+        <id column="user_id" property="user_id"></id>
+        <id column="pro_id" property="pro_id"></id>
+        <id column="pro_num" property="pro_num"></id>
+        <id column="size_id" property="size_id"></id>
+        <id column="pro_sum" property="pro_sum"></id>
+        <id column="create_time" property="create_time"></id>
+        <id column="update_time" property="update_time"></id>
+        <association property="product" javaType="com.guyu.entity.Product">
+            <result property="pro_id" column="pro_id"></result>
+            <result property="pro_name" column="pro_name"></result>
+            <result property="image" column="image"></result>
+            <result property="store_id" column="store_id"></result>
+        </association>
+        <association property="size" javaType="com.guyu.entity.Size">
+            <result property="size_id" column="size_id"></result>
+            <result property="size_title" column="size_title"></result>
+            <result property="pro_price" column="pro_price"></result>
+            <result property="unit" column="unit"></result>
+            <result property="min_num" column="min_num"></result>
+            <result property="max_num" column="max_num"></result>
+        </association>
+    </resultMap>
+
+    <insert id="AddCart" parameterType="com.guyu.entity.Cart">
+     INSERT into gy_cart(user_id,pro_id,pro_num,size_id,pro_sum,create_time,update_time)
+        VALUES (#{user_id},#{pro_id},#{pro_num},#{size_id},#{pro_sum},now(),now())
+    </insert>
+
+    <update id="UpdateTime">
+        update gy_cart set update_time = now() where cart_id = #{cart_id}
+    </update>
+
+    <update id="UpdateCartNum" parameterType="com.guyu.entity.Cart">
+        update gy_cart set pro_num = #{pro_num},pro_sum = #{pro_sum} where cart_id = #{cart_id}
+    </update>
+
+
+    <delete id="dels" parameterType="Integer">
+        delete from gy_cart where cart_id in
+        <foreach item="ids" collection="list" index="index" open="("
+                 separator="," close=")">
+            #{ids}
+        </foreach>
+    </delete>
+
+    <delete id="DelCart">
+        delete from gy_cart where cart_id = #{cart_id}
+    </delete>
+
+    <select id="Total" resultType="java.lang.Integer">
+        select count(*) from gy_cart
+    </select>
+
+    <select id="QueryCart" resultMap="CartMap">
+      select * from gy_cart RIGHT JOIN gy_size on gy_cart.size_id=gy_size.size_id RIGHT JOIN gy_product on gy_cart.pro_id=gy_product.pro_id where gy_cart.user_id=#{user_id}
+    </select>
+
+    <select id="findCart" resultType="java.lang.Integer">
+        select count(*)  from gy_cart where pro_id = #{pro_id} AND user_id=#{user_id} ANd size_id=#{size_id}
+    </select>
+</mapper>

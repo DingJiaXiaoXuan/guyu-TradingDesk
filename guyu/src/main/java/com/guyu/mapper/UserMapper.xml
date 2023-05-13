@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- namespace:当前XML文件用于配置哪个接口中抽象方法对应的SQL语句 -->
+<mapper namespace="com.guyu.mapper.UserMapper">
+
+    <resultMap id="userMap" type="com.guyu.entity.User">
+        <id column="userid" property="userid"/>
+        <result column="username" property="username"/>
+        <result column="account" property="account"/>
+        <result column="password" property="password"/>
+        <result column="image" property="image"/>
+        <result column="userphone" property="userphone"/>
+        <result column="email" property="email"/>
+        <result column="logintime" property="logintime"/>
+        <result column="old_logintime" property="old_logintime"/>
+        <result column="power" property="power"/>
+    </resultMap>
+
+    <!-- 添加一条用户记录 -->
+   <insert id="insertUser" parameterType="com.guyu.entity.User">
+        INSERT into gy_user(username,account,password,image,userphone,email,power)
+        VALUES (#{username},#{account},#{password},#{image},#{userphone},#{email},#{power})
+   </insert>
+
+    <update id="updateUser" parameterType="com.guyu.entity.User">
+        update gy_user
+        <set>
+            <if test="username!=null and username!=''">
+                username=#{username},
+            </if>
+            <if test="account!=null and account!=''">
+                account=#{account},
+            </if>
+            <if test="password!=null and password!=''">
+                password=#{password},
+            </if>
+            <if test="image!=null and image!=''">
+                image=#{image},
+            </if>
+            <if test="userphone!=null and userphone!=''">
+                userphone=#{userphone},
+            </if>
+            <if test="email!=null and email!=''">
+                email=#{email},
+            </if>
+            <if test="power!=null and power!=''">
+                power=#{power},
+            </if>
+        </set>
+        where userid = #{userid}
+    </update>
+
+    <!-- 注册-->
+    <insert id="regUser" parameterType="com.guyu.entity.User">
+       insert into gy_user(username,account,password,userphone) value (#{username},#{account},#{password},#{userphone})
+   </insert>
+    <!-- 基于账号查询用户信息 -->
+    <select id="findUser" resultMap="userMap">
+        select * from gy_user where account = #{account}
+    </select>
+
+    <!-- 基于账号查询用户密码 -->
+    <select id="findPassword" resultType="String">
+        select password from gy_user where account = #{account}
+    </select>
+    <!-- 查询所有用户信息 -->
+    <select id="findAll" resultMap="userMap" parameterType="integer">
+        select * from gy_user limit #{start},#{point}
+    </select>
+
+    <!--查询用户权限-->
+    <select id="findPower" resultType="java.lang.Integer">
+        select power from gy_user where account = #{account}
+    </select>
+    <!--查询用户ID-->
+    <select id="findID" resultType="integer">
+    select userid from gy_user where account = #{account}
+    </select>
+    <!--查询用户名是否存在-->
+    <select id="findName" resultType="java.lang.String">
+     select username from gy_user where username = #{username}
+    </select>
+    <!--查询数据总条数-->
+    <select id="findTotal" resultType="java.lang.Integer">
+        select count(*) from gy_user
+    </select>
+    <!--查询用户名-->
+    <select id="nameinfo" resultType="java.lang.String">
+        select username from gy_user where account = #{account}
+    </select>
+
+    <select id="findLogintime" resultType="java.util.Date">
+        select logintime from gy_user where account = #{account}
+    </select>
+    <!-- 录入登录时间 -->
+    <update id="loginTime">
+        update gy_user set logintime = now() where account = #{account}
+    </update>
+
+    <update id="oid_logintime">
+        update gy_user set old_logintime =#{logintime}  where account = #{account}
+    </update>
+
+    <!--删除用户信息-->
+    <delete id="deluser">
+        delete from gy_user where account = #{account}
+    </delete>
+
+    <!--批量删除用户信息-->
+    <delete id="dels" parameterType="Integer">
+        delete from gy_user where userid in
+        <foreach item="ids" collection="list" index="index" open="("
+                 separator="," close=")">
+            #{ids}
+        </foreach>
+    </delete>
+
+</mapper>
+

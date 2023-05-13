@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- namespace:当前XML文件用于配置哪个接口中抽象方法对应的SQL语句 -->
+<mapper namespace="com.guyu.mapper.AddressMapper">
+
+    <insert id="addAddress" parameterType="com.guyu.entity.Address">
+         INSERT into gy_address(user_id,consignee,phone,address,address_status)
+        VALUES (#{user_id},#{consignee},#{phone},#{address},#{address_status})
+    </insert>
+
+    <update id="updataAddress" parameterType="com.guyu.entity.Address">
+        update gy_address
+        <set>
+            <if test="consignee!=null and consignee!=''">
+                consignee=#{consignee},
+            </if>
+            <if test="phone!=null and phone!=''">
+                phone=#{phone},
+            </if>
+            <if test="address!=null and address!=''">
+                address=#{address},
+            </if>
+            <if test="address_status!=null and address_status!=''">
+                address_status=#{address_status},
+            </if>
+        </set>
+        where address_id = #{address_id}
+    </update>
+
+    <delete id="DelAddress">
+        delete from gy_address where address_id = #{address_id}
+    </delete>
+
+    <select id="QueryAddress" resultType="com.guyu.entity.Address">
+        select * from gy_address where user_id=#{user_id}
+    </select>
+    <select id="findAddress" resultType="com.guyu.entity.Address">
+        select * from gy_address where address_id = #{address_id}
+    </select>
+
+
+</mapper>

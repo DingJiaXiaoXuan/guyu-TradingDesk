@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- namespace:当前XML文件用于配置哪个接口中抽象方法对应的SQL语句 -->
+<mapper namespace="com.guyu.mapper.OrderMapper">
+
+    <resultMap id="OrderMap" type="com.guyu.entity.Order">
+        <id column="ord_id" property="ord_id"></id>
+        <id column="pro_id" property="pro_id"></id>
+        <id column="pro_num" property="pro_num"></id>
+        <id column="size_id" property="size_id"></id>
+        <id column="store_id" property="store_id"></id>
+        <id column="money" property="money"></id>
+        <id column="user_id" property="user_id"></id>
+        <id column="consignee" property="consignee"></id>
+        <id column="phone" property="phone"></id>
+        <id column="address" property="address"></id>
+        <id column="ord_status" property="ord_status"></id>
+        <id column="comment" property="comment"></id>
+        <id column="create_time" property="create_time"></id>
+        <id column="update_time" property="update_time"></id>
+        <association property="user" javaType="com.guyu.entity.User">
+            <result property="userid" column="userid"></result>
+            <result property="username" column="username"></result>
+        </association>
+        <association property="store" javaType="com.guyu.entity.Store">
+            <result property="store_id" column="store_id"></result>
+            <result property="store_name" column="store_name"></result>
+        </association>
+        <association property="size" javaType="com.guyu.entity.Size">
+            <result property="size_id" column="size_id"></result>
+            <result property="size_title" column="size_title"></result>
+            <result property="pro_price" column="pro_price"></result>
+            <result property="unit" column="unit"></result>
+            <result property="min_num" column="min_num"></result>
+            <result property="max_num" column="max_num"></result>
+        </association>
+        <association property="product" javaType="com.guyu.entity.Product">
+            <result property="pro_id" column="pro_id"></result>
+            <result property="pro_name" column="pro_name"></result>
+            <result property="image" column="image"></result>
+
+        </association>
+    </resultMap>
+
+    <insert id="AddOrder" parameterType="com.guyu.entity.Order">
+         INSERT into gy_order(pro_id,pro_num,size_id,store_id,money,user_id,consignee,phone,address,ord_status,comment,create_time,update_time)
+        VALUES (#{pro_id},#{pro_num},#{size_id},#{store_id},#{money},#{user_id},#{consignee},#{phone},#{address},#{ord_status},#{comment},now(),now())
+    </insert>
+
+    <delete id="DelOrder">
+         delete from gy_order where ord_id = #{ord_id}
+    </delete>
+
+    <delete id="dels" parameterType="Integer">
+        delete from gy_order where ord_id in
+        <foreach item="ids" collection="list" index="index" open="("
+                 separator="," close=")">
+            #{ids}
+        </foreach>
+    </delete>
+
+    <select id="Total" resultType="java.lang.Integer">
+        select count(*) from gy_order
+    </select>
+
+
+    <select id="QueryOrder" resultMap="OrderMap">
+        SELECT
+            gy_store.store_name,
+            gy_user.username,
+            gy_order.*,
+            gy_size.*,
+            gy_product.*
+        FROM
+				gy_order
+				LEFT	JOIN gy_user ON gy_order.user_id=gy_user.userid
+				LEFT  JOIN gy_store ON gy_order.store_id=gy_store.store_id
+				LEFT  JOIN gy_product ON gy_order.pro_id=gy_product.pro_id
+				LEFT  JOIN gy_size ON gy_order.size_id=gy_size.size_id
+        limit #{start},#{point}
+    </select>
+
+    <select id="QueryOrder_1" resultMap="OrderMap">
+        SELECT
+            gy_store.store_name,
+            gy_user.username,
+            gy_order.*,
+            gy_size.*,
+            gy_product.*
+        FROM
+				gy_order
+				LEFT	JOIN gy_user ON gy_order.user_id=gy_user.userid
+				LEFT  JOIN gy_store ON gy_order.store_id=gy_store.store_id
+				LEFT  JOIN gy_product ON gy_order.pro_id=gy_product.pro_id
+				LEFT  JOIN gy_size ON gy_order.size_id=gy_size.size_id
+				WHERE gy_order.ord_status=#{ord_status}
+        limit #{start},#{point}
+    </select>
+
+    <select id="QueryOrder_2" resultMap="OrderMap">
+        SELECT
+            gy_store.store_name,
+            gy_user.username,
+            gy_order.*,
+            gy_size.*,
+            gy_product.*
+        FROM
+				gy_order
+				LEFT	JOIN gy_user ON gy_order.user_id=gy_user.userid
+				LEFT  JOIN gy_store ON gy_order.store_id=gy_store.store_id
+				LEFT  JOIN gy_product ON gy_order.pro_id=gy_product.pro_id
+				LEFT  JOIN gy_size ON gy_order.size_id=gy_size.size_id
+				WHERE gy_order.ord_status=#{ord_status}
+				AND gy_order.store_id=#{store_id}
+        limit #{start},#{point}
+    </select>
+
+    <select id="QueryOrder_3" resultMap="OrderMap">
+        SELECT
+            gy_store.store_name,
+            gy_user.username,
+            gy_order.*,
+            gy_size.*,
+            gy_product.*
+        FROM
+				gy_order
+				LEFT	JOIN gy_user ON gy_order.user_id=gy_user.userid
+				LEFT  JOIN gy_store ON gy_order.store_id=gy_store.store_id
+				LEFT  JOIN gy_product ON gy_order.pro_id=gy_product.pro_id
+				LEFT  JOIN gy_size ON gy_order.size_id=gy_size.size_id
+				WHERE gy_order.ord_status=#{ord_status}
+				AND gy_order.user_id=#{user_id}
+        limit #{start},#{point}
+    </select>
+
+    <select id="QueryOrder_4" resultMap="OrderMap">
+        SELECT
+            gy_store.store_name,
+            gy_user.username,
+            gy_order.*,
+            gy_size.*,
+            gy_product.*
+        FROM
+				gy_order
+				LEFT	JOIN gy_user ON gy_order.user_id=gy_user.userid
+				LEFT  JOIN gy_store ON gy_order.store_id=gy_store.store_id
+				LEFT  JOIN gy_product ON gy_order.pro_id=gy_product.pro_id
+				LEFT  JOIN gy_size ON gy_order.size_id=gy_size.size_id
+				WHERE gy_order.user_id=#{user_id}
+        limit #{start},#{point}
+    </select>
+
+    <update id="UpdateStatus">
+        update gy_order set ord_status=#{ord_status} where ord_id = #{ord_id}
+    </update>
+
+    <update id="UpdateTime">
+        update gy_order set update_time = now() where ord_id = #{ord_id}
+    </update>
+
+    <select id="FuzzyQuery" resultType="com.guyu.entity.Order">
+        select * from gy_order
+        <trim prefix="where" prefixOverrides="and">
+            <if test="store_name != null and store_name != ''">
+                and store_name like concat("%",#{store_name},"%")
+            </if>
+            <if test="store_id != null and store_id != ''">
+                and store_id = #{store_id}
+            </if>
+            <if test="user_id != null and user_id!=''">
+                and user_id = #{user_id}
+            </if>
+        </trim>
+    </select>
+
+    <select id="Total_order" resultType="java.lang.Integer">
+        select count(*) from gy_order where ord_status=#{ord_status} AND user_id = #{user_id}
+    </select>
+
+</mapper>

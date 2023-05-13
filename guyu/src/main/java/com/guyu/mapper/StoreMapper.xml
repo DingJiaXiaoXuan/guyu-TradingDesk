@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- namespace:当前XML文件用于配置哪个接口中抽象方法对应的SQL语句 -->
+<mapper namespace="com.guyu.mapper.StoreMapper">
+
+    <resultMap id="StoreMap" type="com.guyu.entity.Store">
+        <id column="store_id" property="store_id"></id>
+        <id column="store_name" property="store_name"></id>
+        <id column="store_title" property="store_title"></id>
+        <id column="store_site" property="store_site"></id>
+        <id column="store_imge" property="store_imge"></id>
+        <id column="user_id" property="user_id"></id>
+        <id column="pro_num" property="pro_num"></id>
+        <id column="store_status" property="store_status"></id>
+        <id column="create_time" property="create_time"></id>
+        <id column="update_time" property="update_time"></id>
+        <association property="user" javaType="com.guyu.entity.User">
+            <result property="userid" column="userid"></result>
+            <result property="username" column="username"></result>
+        </association>
+    </resultMap>
+
+    <insert id="AddStore" parameterType="com.guyu.entity.Store">
+     INSERT into gy_store(store_name,store_title,store_site,store_imge,user_id,pro_num,store_status,create_time,update_time)
+        VALUES (#{store_name},#{store_title},#{store_site},#{store_imge},#{user_id},#{pro_num},#{store_status},now(),now())
+    </insert>
+
+    <update id="UpdateTime">
+        update gy_store set update_time = now() where store_id = #{store_id}
+    </update>
+    <update id="UpdateStore" parameterType="com.guyu.entity.Store">
+        update gy_store
+        <set>
+            <if test="store_name!=null and store_name!=''">
+                store_name=#{store_name},
+            </if>
+            <if test="store_title!=null and store_title!=''">
+                store_title=#{store_title},
+            </if>
+            <if test="store_site!=null and store_site!=''">
+                store_site=#{store_site},
+            </if>
+            <if test="store_imge!=null and store_imge!=''">
+                store_imge=#{store_imge},
+            </if>
+            <if test="store_status!=null">
+                store_status=#{store_status}
+            </if>
+        </set>
+        where store_id = #{store_id}
+    </update>
+
+    <update id="UpdateStatus">
+        update gy_store set store_status= #{store_status} where store_id = #{store_id}
+    </update>
+
+    <update id="updatePro_num">
+        update gy_store set pro_num= #{pro_num} where store_id = #{store_id}
+    </update>
+
+    <delete id="dels" parameterType="Integer">
+        delete from gy_store where store_id in
+        <foreach item="ids" collection="list" index="index" open="("
+                 separator="," close=")">
+            #{ids}
+        </foreach>
+    </delete>
+
+    <delete id="DelStore">
+        delete from gy_store where store_id = #{store_id}
+    </delete>
+
+
+    <select id="FuzzyQuery" resultType="com.guyu.entity.Store">
+        select * from gy_store
+        <trim prefix="where" prefixOverrides="and">
+            <if test="store_name != null and store_name != ''">
+                and store_name like concat("%",#{store_name},"%")
+            </if>
+            <if test="store_id != null and store_id != ''">
+                and store_id = #{store_id}
+            </if>
+            <if test="user_id != null and user_id!=''">
+                and user_id = #{user_id}
+            </if>
+        </trim>
+    </select>
+
+    <select id="Total" resultType="java.lang.Integer">
+        select count(*) from gy_store
+    </select>
+
+    <select id="Total_" resultType="java.lang.Integer">
+        select count(*) from gy_store
+    </select>
+
+    <select id="Total_status" resultType="java.lang.Integer">
+        select count(*) from gy_store where store_status=#{store_status}
+    </select>
+
+
+    <select id="QueryUserStore" resultMap="StoreMap">
+        SELECT
+            gy_store.*,
+            gy_user.username
+        FROM
+			gy_store,gy_user
+        where
+            gy_user.userid=gy_store.user_id
+        AND
+            gy_store.user_id=#{user_id}
+        AND
+            gy_store.store_status <![CDATA[ >= ]]> 1
+        AND
+            gy_store.store_status <![CDATA[ <= ]]> 2
+    </select>
+
+    <select id="QueryStore" resultMap="StoreMap">
+        SELECT
+            gy_store.*,
+            gy_user.username
+        FROM
+			gy_store,gy_user
+        where
+            gy_user.userid=gy_store.user_id
+        limit #{start},#{point}
+    </select>
+
+    <select id="QueryStoreAudit" resultMap="StoreMap">
+        SELECT
+            gy_store.*,
+            gy_user.username
+        FROM
+			gy_store,gy_user
+        where
+            gy_user.userid=gy_store.user_id
+        AND
+            gy_store.store_status=#{store_status}
+        limit #{start},#{point}
+    </select>
+
+    <select id="QueryStoreUser" resultMap="StoreMap">
+        SELECT
+            gy_store.*,
+            gy_user.username
+        FROM
+			gy_store,gy_user
+        where
+            gy_user.userid=gy_store.user_id
+        AND
+            gy_store.user_id=#{user_id}
+        limit #{start},#{point}
+    </select>
+
+    <select id="findStore" resultType="com.guyu.entity.Store">
+        select * from gy_store where store_id=#{store_id}
+    </select>
+    <select id="findPro_num" resultType="java.lang.Integer">
+        select pro_num from gy_store where store_id=#{store_id}
+    </select>
+
+    <select id="Total_user" resultType="java.lang.Integer">
+        select count(*) from gy_store where user_id=#{user_id}
+    </select>
+
+</mapper>

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- namespace:当前XML文件用于配置哪个接口中抽象方法对应的SQL语句 -->
+<mapper namespace="com.guyu.mapper.NoticeMapper">
+
+    <insert id="AddNotice" parameterType="com.guyu.entity.Notice">
+        INSERT into gy_notice(notice_title,user_name,content,notice_status,create_time,update_time)
+        VALUES (#{notice_title},#{user_name},#{content},#{notice_status},now(),now())
+    </insert>
+
+    <update id="UpdateTime">
+        update gy_notice set update_time = now() where notice_id = #{notice_id}
+    </update>
+
+    <update id="UpdateStatus">
+        update gy_notice set notice_status=#{notice_status} where notice_id = #{notice_id}
+    </update>
+
+    <update id="updateNotice">
+        update gy_notice
+        <set>
+            <if test="notice_title!=null and notice_title!=''">
+                notice_title=#{notice_title},
+            </if>
+            <if test="user_name!=null and user_name!=''">
+                user_name=#{user_name},
+            </if>
+            <if test="content!=null and content!=''">
+                content=#{content},
+            </if>
+        </set>
+        where notice_id = #{notice_id}
+    </update>
+
+    <update id="publish_time">
+        update gy_notice set publish_time = now() where notice_id = #{notice_id}
+    </update>
+
+    <delete id="DelNotice">
+        delete from gy_notice where notice_id = #{notice_id}
+    </delete>
+
+    <select id="QueryNotice" resultType="com.guyu.entity.Notice">
+        select * from gy_notice limit #{start},#{point}
+    </select>
+
+    <select id="Total" resultType="java.lang.Integer">
+        select count(*) from gy_notice
+    </select>
+
+
+</mapper>

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- namespace:当前XML文件用于配置哪个接口中抽象方法对应的SQL语句 -->
+<mapper namespace="com.guyu.mapper.CollectMapper">
+
+    <resultMap id="CollectMap" type="com.guyu.entity.Collect">
+        <id column="collect_id" property="collect_id"></id>
+        <id column="pro_id" property="pro_id"></id>
+        <id column="user_id" property="user_id"></id>
+        <id column="create_time" property="create_time"></id>
+        <association property="product" javaType="com.guyu.entity.Product">
+            <result property="pro_id" column="pro_id"></result>
+            <result property="pro_name" column="pro_name"></result>
+            <result property="image" column="image"></result>
+            <result property="price" column="price"></result>
+        </association>
+    </resultMap>
+
+    <insert id="AddCollect" parameterType="com.guyu.entity.Collect">
+        INSERT INTO gy_collect(pro_id,user_id,create_time)
+        VALUE (#{pro_id},#{user_id},now())
+    </insert>
+
+    <delete id="DelCollect">
+        delete from gy_collect where collect_id = #{collect_id}
+    </delete>
+
+    <delete id="dels" parameterType="Integer">
+        delete from gy_collect where collect_id in
+        <foreach item="ids" collection="list" index="index" open="("
+                 separator="," close=")">
+            #{ids}
+        </foreach>
+    </delete>
+
+    <select id="QueryCollect" resultMap="CollectMap">
+        SELECT
+            gy_collect.*,
+            gy_product.pro_name,
+            gy_product.image,
+            gy_product.price
+        FROM
+            gy_collect,gy_product
+        WHERE
+            gy_collect.user_id=#{user_id}
+        AND
+            gy_collect.pro_id=gy_product.pro_id
+    </select>
+
+    <select id="Total" resultType="java.lang.Integer">
+        select count(*) from gy_collect where user_id=#{user_id}
+    </select>
+    <select id="FindPro_id" resultType="com.guyu.entity.Collect">
+        select * from gy_collect where pro_id=#{pro_id}
+    </select>
+
+</mapper>

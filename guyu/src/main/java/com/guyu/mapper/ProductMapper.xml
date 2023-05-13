@@ -1,0 +1,342 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- namespace:当前XML文件用于配置哪个接口中抽象方法对应的SQL语句 -->
+<mapper namespace="com.guyu.mapper.ProductMapper">
+
+    <resultMap id="ProductMap" type="com.guyu.entity.Product">
+        <id column="pro_id" property="pro_id"></id>
+        <id column="pro_name" property="pro_name"></id>
+        <id column="cate_id" property="cate_id"></id>
+        <id column="origin" property="origin"></id>
+        <id column="amount" property="amount"></id>
+        <id column="price" property="price"></id>
+        <id column="image" property="image"></id>
+        <id column="title" property="title"></id>
+        <id column="detail" property="detail"></id>
+        <id column="user_id" property="user_id"></id>
+        <id column="store_id" property="store_id"></id>
+        <id column="pro_status" property="pro_status"></id>
+        <id column="create_time" property="create_time"></id>
+        <id column="update_time" property="update_time"></id>
+        <association property="user" javaType="com.guyu.entity.User">
+            <result property="userid" column="userid"></result>
+            <result property="username" column="username"></result>
+        </association>
+        <association property="store" javaType="com.guyu.entity.Store">
+            <result property="store_id" column="store_id"></result>
+            <result property="store_name" column="store_name"></result>
+            <result property="store_title" column="store_title"></result>
+            <result property="store_site" column="store_site"></result>
+            <result property="store_imge" column="store_imge"></result>
+        </association>
+        <association property="category" javaType="com.guyu.entity.Category">
+            <result property="cate_id" column="cate_id"></result>
+            <result property="cate_name" column="cate_name"></result>
+            <result property="main_id" column="main_id"></result>
+        </association>
+
+    </resultMap>
+
+    <insert id="AddProduct">
+        INSERT into gy_product(pro_name,cate_id,origin,amount,price,image,title,detail,pro_status,user_id,store_id,create_time,update_time)
+        VALUES (#{pro_name},#{cate_id},#{origin},#{amount},#{price},#{image},#{title},#{detail},#{pro_status},#{user_id},#{store_id},now(),now())
+    </insert>
+
+    <update id="UpdateProduct" parameterType="com.guyu.entity.Product">
+        update gy_product
+        <set>
+            <if test="pro_name!=null and pro_name!=''">
+                pro_name=#{pro_name},
+            </if>
+            <if test="cate_id!=null and cate_id!=''">
+                cate_id=#{cate_id},
+            </if>
+            <if test="origin!=null and origin!=''">
+                origin=#{origin},
+            </if>
+            <if test="amount!=null and amount!=''">
+                amount=#{amount},
+            </if>
+            <if test="image!=null and image!=''">
+                image=#{image},
+            </if>
+            <if test="title!=null and title!=''">
+                title=#{title},
+            </if>
+            <if test="detail!=null and detail!=''">
+                detail=#{detail},
+            </if>
+            <if test="pro_status!=null ">
+                pro_status=#{pro_status},
+            </if>
+            <if test="user_id!=null and user_id!=''">
+                user_id=#{user_id},
+            </if>
+            <if test="store_id!=null and store_id!=''">
+                store_id=#{store_id},
+            </if>
+        </set>
+        where pro_id = #{pro_id}
+    </update>
+
+    <update id="UpdateTime">
+        update gy_product set update_time = now() where pro_id = #{pro_id}
+    </update>
+
+    <update id="UpdateStatus">
+        update gy_product set pro_status=#{pro_status} where pro_id = #{pro_id}
+    </update>
+
+    <update id="updateStorePro">
+        update gy_product set pro_status=#{pro_status} where store_id = #{store_id}
+    </update>
+
+    <delete id="DelProduct">
+        delete from gy_product where pro_id = #{pro_id}
+    </delete>
+
+    <delete id="DelProStore">
+        delete from gy_product where store_id = #{store_id}
+    </delete>
+
+    <delete id="dels" parameterType="Integer">
+        delete from gy_product where pro_id in
+        <foreach item="ids" collection="list" index="index" open="("
+                 separator="," close=")">
+            #{ids}
+        </foreach>
+    </delete>
+
+    <delete id="dels_store" parameterType="Integer">
+        delete from gy_product where store_id in
+        <foreach item="ids" collection="list" index="index" open="("
+                 separator="," close=")">
+            #{ids}
+        </foreach>
+    </delete>
+
+<!--    <select id="QueryProduct" resultType="com.guyu.entity.Product">-->
+<!--         select * from gy_product limit #{start},#{point}-->
+<!--    </select>-->
+
+    <select id="QueryProduct" resultMap="ProductMap">
+         SELECT
+            gy_product.*,
+            gy_store.store_name,
+            gy_user.username,
+            gy_category.cate_name
+        FROM
+			gy_product,gy_store,gy_user,gy_category
+       	WHERE
+			gy_product.user_id=gy_user.userid
+		AND
+			gy_product.store_id=gy_store.store_id
+		AND
+		    gy_product.cate_id=gy_category.cate_id
+        limit #{start},#{point}
+    </select>
+
+    <select id="QueryAllProduct" resultMap="ProductMap">
+         SELECT
+            gy_product.*,
+            gy_store.store_name,
+            gy_user.username,
+            gy_category.cate_name
+        FROM
+			gy_product,gy_store,gy_user,gy_category
+       	WHERE
+			gy_product.user_id=gy_user.userid
+		AND
+			gy_product.store_id=gy_store.store_id
+		AND
+		    gy_product.cate_id=gy_category.cate_id
+		AND
+		    gy_product.pro_status=2
+        limit #{start},#{point}
+    </select>
+
+    <select id="QueryProductAudit" resultMap="ProductMap">
+         SELECT
+            gy_product.*,
+            gy_store.store_name,
+            gy_user.username,
+            gy_category.cate_name
+        FROM
+			gy_product,gy_store,gy_user,gy_category
+       	WHERE
+			gy_product.user_id=gy_user.userid
+		AND
+			gy_product.store_id=gy_store.store_id
+		AND
+		    gy_product.cate_id=gy_category.cate_id
+		AND gy_product.pro_status=#{pro_status}
+        limit #{start},#{point}
+    </select>
+
+
+    <select id="CateProduct" resultMap="ProductMap">
+         SELECT
+            gy_product.*,
+            gy_store.store_name,
+            gy_user.username,
+            gy_category.cate_name
+        FROM
+			gy_product,gy_store,gy_user,gy_category
+       	WHERE
+			gy_product.user_id=gy_user.userid
+		AND
+			gy_product.store_id=gy_store.store_id
+		AND
+		    gy_product.cate_id=gy_category.cate_id
+		AND gy_product.cate_id = #{cate_id}
+		AND gy_product.pro_status=2
+        limit #{start},#{point}
+    </select>
+
+    <select id="MainProduct" resultMap="ProductMap">
+         SELECT
+            gy_product.*,
+            gy_store.store_name,
+            gy_user.username,
+            gy_category.cate_name,
+            gy_category.main_id
+        FROM
+			gy_product,gy_store,gy_user,gy_category
+       	WHERE
+			gy_product.user_id=gy_user.userid
+		AND
+			gy_product.store_id=gy_store.store_id
+		AND
+		    gy_product.cate_id=gy_category.cate_id
+		AND
+		    gy_category.main_id = #{main_id}
+		AND
+		    gy_product.pro_status=2
+        limit #{start},#{point}
+    </select>
+
+    <select id="StoreProduct" resultMap="ProductMap">
+         SELECT
+            gy_product.*,
+            gy_store.store_name,
+            gy_user.username,
+            gy_category.cate_name,
+            gy_category.main_id
+        FROM
+			gy_product,gy_store,gy_user,gy_category
+       	WHERE
+			gy_product.user_id=gy_user.userid
+		AND
+			gy_product.store_id=gy_store.store_id
+		AND
+		    gy_product.cate_id=gy_category.cate_id
+		AND
+		    gy_product.store_id=#{store_id}
+		AND
+		    gy_product.pro_status=2
+        limit #{start},#{point}
+    </select>
+
+    <select id="UserProduct" resultMap="ProductMap">
+         SELECT
+            gy_product.*,
+            gy_store.store_name,
+            gy_user.username,
+            gy_category.cate_name,
+            gy_category.main_id
+        FROM
+			gy_product,gy_store,gy_user,gy_category
+       	WHERE
+			gy_product.user_id=gy_user.userid
+		AND
+			gy_product.store_id=gy_store.store_id
+		AND
+		    gy_product.cate_id=gy_category.cate_id
+		AND
+		    gy_product.user_id=#{user_id}
+        limit #{start},#{point}
+    </select>
+
+
+    <select id="RecommendProduct" resultMap="ProductMap">
+         SELECT
+            gy_product.*,
+            gy_store.store_name,
+            gy_user.username,
+            gy_category.cate_name
+        FROM
+			gy_product,gy_store,gy_user,gy_category
+       	WHERE
+			gy_product.user_id=gy_user.userid
+		AND
+			gy_product.store_id=gy_store.store_id
+		AND
+		    gy_product.cate_id=gy_category.cate_id
+		AND
+		    gy_product.cate_id = #{cate_id}
+        limit 0,5
+    </select>
+
+    <select id="FuzzyQuery" resultType="com.guyu.entity.Product">
+        select * from gy_product
+        <trim prefix="where" prefixOverrides="and">
+            <if test="pro_name != null and pro_name != ''">
+                and pro_name like concat("%",#{pro_name},"%")
+            </if>
+            <if test="pro_id != null and pro_id != ''">
+                and pro_id = #{pro_id}
+            </if>
+            <if test="cate_id != null and cate_id!=''">
+                and cate_id = #{cate_id}
+            </if>
+        </trim>
+    </select>
+
+    <select id="Total" resultType="java.lang.Integer">
+        select count(*) from gy_product
+    </select>
+
+    <select id="Total_cate" resultType="java.lang.Integer">
+        select count(*) from gy_product where cate_id=#{cate_id} AND pro_status=2
+    </select>
+
+    <select id="Total_store" resultType="java.lang.Integer">
+        select count(*) from gy_product where store_id=#{store_id} AND pro_status=2
+    </select>
+
+    <select id="Total_user" resultType="java.lang.Integer">
+        select count(*) from gy_product where user_id=#{user_id}
+    </select>
+
+    <select id="Total_AllPro" resultType="java.lang.Integer">
+        select count(*) from gy_product where pro_status=2
+    </select>
+
+    <select id="Total_status" resultType="java.lang.Integer">
+        select count(*) from gy_product where pro_status=#{pro_status}
+    </select>
+
+    <select id="findProduct" resultMap="ProductMap">
+        SELECT
+            gy_product.*,
+            gy_store.*,
+            gy_user.username,
+            gy_category.cate_name
+        FROM
+			gy_product,gy_store,gy_user,gy_category
+       	WHERE
+			gy_product.user_id=gy_user.userid
+		AND
+			gy_product.store_id=gy_store.store_id
+		AND
+		    gy_product.cate_id=gy_category.cate_id
+		AND
+		    gy_product.pro_id=#{pro_id}
+    </select>
+
+    <select id="findStore_id" resultType="java.lang.Integer">
+        select store_id from gy_product where pro_id=#{pro_id}
+    </select>
+
+</mapper>

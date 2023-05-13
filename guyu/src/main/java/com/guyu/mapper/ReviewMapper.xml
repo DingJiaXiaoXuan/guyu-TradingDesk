@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- namespace:当前XML文件用于配置哪个接口中抽象方法对应的SQL语句 -->
+<mapper namespace="com.guyu.mapper.ReviewMapper">
+    <resultMap id="reviewMap" type="com.guyu.entity.Review">
+        <id column="review_id" property="review_id"></id>
+        <id column="pro_id" property="pro_id"></id>
+        <id column="store_id" property="store_id"></id>
+        <id column="content" property="content"></id>
+        <id column="user_id" property="user_id"></id>
+        <id column="review_status" property="review_status"></id>
+        <id column="create_time" property="create_time"></id>
+        <id column="update_time" property="update_time"></id>
+        <association property="user" javaType="com.guyu.entity.User">
+            <result property="userid" column="userid"></result>
+            <result property="username" column="username"></result>
+        </association>
+        <association property="product" javaType="com.guyu.entity.Product">
+            <result property="pro_id" column="pro_id"></result>
+            <result property="pro_name" column="pro_name"></result>
+        </association>
+        <association property="store" javaType="com.guyu.entity.Store">
+            <result property="store_id" column="store_id"></result>
+            <result property="store_name" column="store_name"></result>
+        </association>
+    </resultMap>
+
+    <insert id="AddReview" parameterType="com.guyu.entity.Review">
+     INSERT into gy_review(pro_id,store_id,content,user_id,review_status,create_time,update_time)
+        VALUES (#{pro_id},#{store_id},#{content},#{user_id},#{review_status},now(),now())
+    </insert>
+
+    <update id="UpdateTime">
+        update gy_review set update_time = now() where review_id = #{review_id}
+    </update>
+
+    <update id="UpdateReview" parameterType="com.guyu.entity.Review">
+        update gy_review set content = #{content} where review_id = #{review_id}
+    </update>
+
+    <delete id="dels" parameterType="Integer">
+        delete from gy_review where review_id in
+        <foreach item="ids" collection="list" index="index" open="("
+                 separator="," close=")">
+            #{ids}
+        </foreach>
+    </delete>
+
+    <select id="QueryReview" resultMap="reviewMap">
+        SELECT
+            gy_review.*,
+            gy_user.username,
+            gy_product.pro_name,
+            gy_store.store_name
+        FROM
+			gy_review,gy_user,gy_product,gy_store
+        where
+            gy_user.userid=gy_review.user_id
+            and gy_review.pro_id = gy_product.pro_id
+            and gy_store.store_id = gy_store.store_id
+        limit #{start},#{point}
+    </select>
+
+    <select id="findReview" resultMap="reviewMap">
+        select
+            gy_review.*,
+            gy_user.username
+        from
+            gy_review,gy_user
+        where
+            gy_review.review_status=#{review_status}
+        and
+            gy_review.user_id=gy_user.userid
+        and
+            gy_review.pro_id=#{pro_id}
+    </select>
+
+    <delete id="DelReview">
+        delete from gy_review where review_id = #{review_id}
+    </delete>
+
+    <select id="Total" resultType="java.lang.Integer">
+        select count(*) from gy_review
+    </select>
+
+    <update id="UpdateStatus">
+        update gy_review set review_status=#{review_status} where review_id = #{review_id}
+    </update>
+</mapper>
